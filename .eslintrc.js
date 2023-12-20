@@ -12,6 +12,11 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
+  settings: {
+    'import/resolver': {
+      'babel-module': {},
+    },
+  },
   plugins: ['react', '@typescript-eslint', 'prettier'],
   rules: {
     '@typescript-eslint/no-shadow': ['error'],
