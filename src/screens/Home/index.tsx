@@ -1,10 +1,18 @@
+import Logo from '@components/Logo';
+import ProductList from '@containers/ProductList';
+import colors from '@theme/colors';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { SafeAreaView, StyleSheet } from 'react-native';
 
 const HomeScreen = () => (
-  <View>
-    <Text>Home Screen</Text>
-  </View>
+  <SafeAreaView style={styles.container}>
+    <Logo />
+    <ProductList />
+  </SafeAreaView>
 );
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+});
 
 export default HomeScreen;

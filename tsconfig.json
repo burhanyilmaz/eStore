@@ -12,6 +12,8 @@
       "@theme/*": ["./theme/*"],
       "@store/*": ["./store/*"],
       "@type/*": ["./type/*"],
+      "@services/*": ["./services/*"],
+      "@containers/*": ["./containers/*"],
     }
   }
 }
