@@ -9,6 +9,10 @@ class ProductsStore {
   products: Products[] = [];
   error: undefined | string;
 
+  selectedProductLoading = false;
+  selectedProduct: Products | undefined;
+  selectedProductError: undefined | string;
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -38,6 +42,28 @@ class ProductsStore {
       .finally(() => {
         runInAction(() => {
           this.loading = false;
+        });
+      });
+  };
+
+  getProduct = async (id: number) => {
+    this.selectedProductError = undefined;
+    this.selectedProductLoading = true;
+
+    await Api.getProduct(id)
+      .then(response => {
+        if (response.success) {
+          this.selectedProduct = response.data;
+        } else {
+          this.selectedProductError = response.message || 'Some error occurred.';
+        }
+      })
+      .catch(error => {
+        this.selectedProductError = error.message || 'Some error occurred.';
+      })
+      .finally(() => {
+        runInAction(() => {
+          this.selectedProductLoading = false;
         });
       });
   };

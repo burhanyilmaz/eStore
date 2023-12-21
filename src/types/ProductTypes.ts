@@ -59,3 +59,10 @@ export type GetProductsResponseType = {
   code: string;
   message: string;
 };
+
+export type GetProductResponseType = {
+  success: boolean;
+  data: Products;
+  code: string;
+  message: string;
+};

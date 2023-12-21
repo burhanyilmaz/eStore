@@ -1,7 +1,9 @@
 import ProductCard from '@components/ProductCard';
+import ErrorMessage from '@components/core/ErrorMessage';
+import { MainNavigatorParams } from '@navigators/MainNavigator';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import productsStore from '@store/ProductStore';
 import colors from '@theme/colors';
-import { AlertTriangle } from 'lucide-react-native';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect } from 'react';
 import {
@@ -11,12 +13,11 @@ import {
   Platform,
   RefreshControl,
   StyleSheet,
-  Text,
-  View,
 } from 'react-native';
 import { Products } from 'types/ProductTypes';
 
 const ProductList = () => {
+  const { navigate } = useNavigation<NavigationProp<MainNavigatorParams>>();
   const { getProducts, error, loading, paginatedProducts, increasePage } = productsStore;
 
   useEffect(() => {
@@ -27,21 +28,18 @@ const ProductList = () => {
     <ProductCard
       title={item.title}
       price={item.price}
-      onPress={() => null}
       image={item.images[0]?.small}
       category={item.categories[0].title}
+      onPress={() => navigate('ProductDetails', { productId: item.id })}
     />
   );
+
+  const keyExtractor = (item: Products) => item.id.toString();
 
   const ListEmptyComponent = () => <ActivityIndicator color={colors.primary} size={'large'} />;
 
   if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <AlertTriangle color={colors.error} size={48} />
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
+    return <ErrorMessage message={error} />;
   }
 
   return (
@@ -61,6 +59,7 @@ const ProductList = () => {
       })}
       removeClippedSubviews
       renderItem={renderItem}
+      keyExtractor={keyExtractor}
       onEndReached={increasePage}
       data={paginatedProducts || []}
       ListEmptyComponent={ListEmptyComponent}
