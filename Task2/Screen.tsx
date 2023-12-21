@@ -1,29 +1,55 @@
 import React, { useState } from 'react';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { View, StyleSheet, TextInput, TextInputProps, TouchableOpacity, Text } from 'react-native';
 
-type Props = {} & TextInputProps;
+//components/core/Input.tsx
+type InputProps = Pick<TextInputProps, 'onChangeText'> & Pick<TextInputProps, 'value'>;
+const Input = (props: InputProps) => <TextInput {...props} />;
 
-const Input: React.FC<Props> = props => <TextInput {...props} />;
+//components/core/Button.tsx
+type ButtonProps = { onPress: () => void; title: string; disabled?: boolean };
+const Button = ({ onPress, title, disabled }: ButtonProps) => (
+  <TouchableOpacity
+    onPress={onPress}
+    disabled={disabled}
+    style={disabled ? styles.disabledButton : {}}>
+    <Text style={styles.buttonTitle}>{title}</Text>
+  </TouchableOpacity>
+);
 
-const Screen: React.FC = ({ navigation }) => {
-  const [name, setName] = useState('');
-  const submitName = () => {
-    navigation.navigate('AnotherScreen', { name });
+// from MainNavigator file
+type NavigatorParams = {
+  AnotherScreen: {
+    name: string;
   };
+};
+
+// screens/Screen.tsx
+const Screen = () => {
+  const [name, setName] = useState('');
+  const { navigate } = useNavigation<NavigationProp<NavigatorParams>>();
+
+  const submitName = () => navigate('AnotherScreen', { name });
+
+  const onChangeNameText = (value: string) => setName(value);
 
   return (
     <View style={styles.container}>
-      <Input value={name} onChangeText={text => setName(text)} />
-      <TouchableOpacity onPress={() => submitName()}>
-        <Text style={styles.title}>DONE</Text>
-      </TouchableOpacity>
+      <Input value={name} onChangeText={onChangeNameText} />
+      <Button onPress={submitName} title="DONE" disabled={!!name} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  title: {
+  container: { flex: 1 },
+  buttonTitle: {
     fontSize: 20,
     color: 'red',
   },
+  disabledButton: {
+    opacity: 0.7,
+  },
 });
+
+export default Screen;
