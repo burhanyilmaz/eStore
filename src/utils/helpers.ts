@@ -1,4 +1,6 @@
-import { Insets } from 'react-native';
+import { Dimensions, Insets } from 'react-native';
+
+export const { width, height } = Dimensions.get('screen');
 
 export const getHitSlop = (
   params: Insets & { value?: number } = {
@@ -18,5 +20,3 @@ export const getHitSlop = (
     bottom: bottom || value,
   };
 };
-
-export default { getHitSlop };
