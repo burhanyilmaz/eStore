@@ -1,37 +1,99 @@
-import { makeObservable, observable, action } from 'mobx';
+import axios from 'axios';
+import { makeAutoObservable, runInAction } from 'mobx';
 
-class ProductsStore {
-  products = [];
-  cartItems = [];
-  addresses = [];
+// Api service
+const BASE_URL = 'https://example-api.com/';
+const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+});
+
+class Api {
+  static fetchProducts = (): Promise<object[]> => axiosInstance.get('products');
+  static fetchAddresses = (): Promise<object[]> => axiosInstance.get('addresses');
+}
+
+class AddressesStore {
+  loading = false;
+  addresses: object[] = [];
+  error: undefined | string;
+
   constructor() {
-    makeObservable(this);
+    makeAutoObservable(this);
   }
-  fetchProducts() {
-    axios
-      .get('https://example-api.com/products')
+
+  fetchAddresses = async () => {
+    this.loading = true;
+    this.error = undefined;
+
+    await Api.fetchAddresses()
       .then(response => {
-        this.products = response.data;
+        runInAction(() => {
+          this.addresses = response;
+          this.loading = true;
+        });
       })
-      .catch(error => console.error('Error fetching products: ', error));
+      .catch(error => {
+        runInAction(() => {
+          this.error = error.message;
+          this.loading = true;
+        });
+      });
+  };
+}
+
+class CartStore {
+  cartItems: object[] = [];
+  error: undefined | string;
+
+  constructor() {
+    makeAutoObservable(this);
   }
-  fetchAddresses() {
-    axios
-      .get('https://example-api.com/addresses')
-      .then(response => {
-        this.addresses = response.data;
-      })
-      .catch(error => console.error('Error fetching addresses: ', error));
-  }
-  addToCart(product) {
+
+  addToCart(product: object) {
     this.cartItems.push(product);
   }
-  removeFromCart(productId) {
-    const index = this.cartItems.findIndex(item => item.id === productId);
-    this.cartItems.splice(index, 1);
+
+  removeFromCart(productId: number) {
+    if (!productId) {
+      this.error = 'Product id is not exist';
+
+      return;
+    }
+
+    this.error = this.error && undefined;
+    this.cartItems = this.cartItems.filter(product => product.id !== productId);
   }
 }
 
-const store = new ProductsStore();
+class ProductsStore {
+  loading = false;
+  products: object[] = [];
+  error: undefined | string;
 
-export default store;
+  constructor() {
+    makeAutoObservable(this);
+  }
+
+  fetchProducts = async () => {
+    this.error = '';
+    this.loading = true;
+
+    await Api.fetchProducts()
+      .then(response => {
+        runInAction(() => {
+          this.products = response;
+          this.loading = true;
+        });
+      })
+      .catch(error => {
+        runInAction(() => {
+          this.error = error.message;
+          this.loading = true;
+        });
+      });
+  };
+}
+
+export const productStore = new ProductsStore();
+export const cartStore = new CartStore();
+export const addressesStore = new AddressesStore();
